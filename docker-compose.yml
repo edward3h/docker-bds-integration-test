@@ -1,0 +1,75 @@
+version: "3.8"
+
+volumes:
+  mc-data:
+  backups:
+  mosquitto-data:
+  mosquitto-logs:
+
+services:
+  minecraft1:
+    image: itzg/minecraft-bedrock-server:2022.1.0
+    container_name: minecraft1
+    restart: "unless-stopped"
+    environment:
+      EULA: "TRUE"
+      SERVER_NAME: "bds-integration-test"
+      GAMEMODE: "survival"
+      DIFFICULTY: "hard"
+      LEVEL_NAME: "bds-test"
+      LEVEL_TYPE: "default"
+      ALLOW_CHEATS: "false"
+      VERSION: LATEST
+    ports:
+      - 19132:19132/udp
+    volumes:
+      - mc-data:/data
+    stdin_open: true
+    tty: true
+    labels:
+      - minecraft_bedrock_server=true
+
+  backup:
+    image: kaiede/minecraft-bedrock-backup
+    container_name: backup
+    restart: "unless-stopped"
+    depends_on:
+      - "minecraft1"
+    environment:
+      TZ: "America/New_York"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - backups:/backups
+      - mc-data:/minecraft1
+      - ./backup_config.yml:/backups/config.yml
+    labels:
+      - minecraft_backup_server=true
+    stdin_open: true
+    tty: true
+
+  webhook:
+    image: ghcr.io/edward3h/mc-webhook:0.4-SNAPSHOT-f945730b6dcd435a4e603cfe7268c5129e1e4576
+    restart: "unless-stopped"
+    depends_on:
+      - messages
+    environment:
+      - LOGGER_LEVELS_ORG_ETHELRED=TRACE
+      - LOGGER_LEVELS_ORG_ECLIPSE_PAHO=DEBUG
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./webhook_config.yml:/config.yml
+
+  messages:
+    image: eclipse-mosquitto:2
+    restart: "unless-stopped"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-logs:/mosquitto/log
+
+  message_test:
+    image: eclipse-mosquitto:2
+    restart: "unless-stopped"
+    depends_on:
+      - messages
+    command: "mosquitto_sub -h messages -I message_logger -F '\e[92m%t \e[96m%p\e[0m' -q 0 -t '#'"

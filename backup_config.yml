@@ -1,0 +1,16 @@
+containers:
+  bedrock:
+    - name: minecraft1
+      worlds:
+        - /minecraft1/worlds/bds-test
+schedule:
+  startupDelay: 1m
+  onLastLogout: true
+  onPlayerLogin: true
+  onPlayerLogout: true
+  minInterval: 2m
+  daily: "23:00"
+trim:
+  trimDays: 1
+  keepDays: 2
+  minKeep: 1

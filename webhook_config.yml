@@ -1,0 +1,15 @@
+mc-webhook:
+  imageLabels:
+    - minecraft_bedrock_server
+  backupImageLabels:
+    - minecraft_backup_server
+  webhooks:
+    mqtt1:
+      type: mqtt
+      topic: mc-webhook
+
+mqtt:
+  client:
+    client-id: mc-webhook
+    server-uri: tcp://messages:1883
+    clean-start: true
