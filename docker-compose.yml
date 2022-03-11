@@ -5,6 +5,7 @@ volumes:
   backups:
   mosquitto-data:
   mosquitto-logs:
+  web:
 
 services:
   minecraft1:
@@ -48,13 +49,13 @@ services:
     tty: true
 
   webhook:
-    image: ghcr.io/edward3h/mc-webhook:0.4-SNAPSHOT-f945730b6dcd435a4e603cfe7268c5129e1e4576
+    image: ghcr.io/edward3h/mc-webhook:0.4
     restart: "unless-stopped"
     depends_on:
       - messages
-    environment:
-      - LOGGER_LEVELS_ORG_ETHELRED=TRACE
-      - LOGGER_LEVELS_ORG_ECLIPSE_PAHO=DEBUG
+    # environment:
+      # - LOGGER_LEVELS_ORG_ETHELRED=TRACE
+      # - LOGGER_LEVELS_ORG_ECLIPSE_PAHO=DEBUG
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./webhook_config.yml:/config.yml
@@ -73,3 +74,26 @@ services:
     depends_on:
       - messages
     command: "mosquitto_sub -h messages -I message_logger -F '\e[92m%t \e[96m%p\e[0m' -q 0 -t '#'"
+
+  map_builder:
+    image: ghcr.io/edward3h/bedrock-viz-from-backups:v0.2
+    restart: "unless-stopped"
+    depends_on:
+      - messages
+    volumes:
+      - backups:/backups
+      - /tmp:/data
+      - web:/web
+    environment:
+      - MQTT_SERVER_HOST=messages
+      - MQTT_SUBSCRIBE_TOPIC=mc-webhook
+      - MQTT_PUBLISH_TOPIC=mc-maps
+      - WEB_HOST_TARGET=/web
+
+  map_server:
+    image: halverneus/static-file-server:v1.8.5
+    restart: "unless-stopped"
+    volumes:
+      - web:/web
+    ports:
+      - "8080:8080"

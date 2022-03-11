@@ -8,7 +8,7 @@ schedule:
   onLastLogout: true
   onPlayerLogin: true
   onPlayerLogout: true
-  minInterval: 2m
+  minInterval: 10m
   daily: "23:00"
 trim:
   trimDays: 1
