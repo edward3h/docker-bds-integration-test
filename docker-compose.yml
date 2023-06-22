@@ -49,7 +49,7 @@ services:
     tty: true
 
   webhook:
-    image: ghcr.io/edward3h/mc-webhook:0.4.1
+    image: ghcr.io/edward3h/mc-webhook:0.4.2
     restart: "unless-stopped"
     depends_on:
       - messages
