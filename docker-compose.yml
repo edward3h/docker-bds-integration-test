@@ -91,7 +91,7 @@ services:
       - WEB_HOST_TARGET=/web
 
   map_server:
-    image: halverneus/static-file-server:v1.8.5
+    image: halverneus/static-file-server:v1.8.10
     restart: "unless-stopped"
     volumes:
       - web:/web
