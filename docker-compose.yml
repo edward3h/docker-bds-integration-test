@@ -76,7 +76,7 @@ services:
     command: "mosquitto_sub -h messages -I message_logger -F '\e[92m%t \e[96m%p\e[0m' -q 0 -t '#'"
 
   map_builder:
-    image: ghcr.io/edward3h/bedrock-viz-from-backups:v0.2
+    image: ghcr.io/edward3h/bedrock-viz-from-backups:v0.4
     restart: "unless-stopped"
     depends_on:
       - messages
